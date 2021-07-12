@@ -1,0 +1,17 @@
+## Interface: 20501
+## Title: Profession Professor
+## Author: Gyldendahl-MirageRaceway-EU Updated by Xiri-MirageRaceway-EU
+## Notes: Exports profession skills to be used with discord
+## Version: 1.14.0
+## SavedVariables: ProfessionProfessorDB
+
+Libs\LibStub\LibStub.lua
+Libs\AceAddon-3.0\AceAddon-3.0.xml
+Libs\AceSerializer-3.0\AceSerializer-3.0.xml
+Libs\AceEvent-3.0\AceEvent-3.0.xml
+Libs\AceConsole-3.0\AceConsole-3.0.xml
+Libs\AceDB-3.0\AceDB-3.0.xml
+Libs\AceGUI-3.0\AceGUI-3.0.xml
+#Libs\LibRecipes-3.0\LibRecipes-3.0.lua
+
+ProfessionProfessor.lua
