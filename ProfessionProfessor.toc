@@ -1,4 +1,4 @@
-## Interface: 20501
+## Interface: 30400
 ## Title: Profession Professor
 ## Author: Gyldendahl-MirageRaceway-EU Updated by Xiri-MirageRaceway-EU
 ## Notes: Exports profession skills to be used with discord

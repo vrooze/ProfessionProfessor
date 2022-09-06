@@ -12,7 +12,8 @@ local allowedTradeskills = {
     "Leatherworking",
     "Tailoring",
     "Jewelcrafting",
-    "Cooking"
+    "Cooking",
+    "Inscription"
 }
 
 -- AceAddon :OnInitialize()
