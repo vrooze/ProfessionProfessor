@@ -146,7 +146,7 @@ function showJson()
 	editBox:SetWidth(800)
     editBox:SetHeight(500)
     editBox:SetText(convertTableToString())
-    editBox:SetLabel("Copy text and paste into your discord channel with the Profession Professor bot with an !pp-upload in front of the text")
+    editBox:SetLabel("Copy text and paste into your discord channel with the Profession Professor bot and using the /upload slash command")
     editBox:SetNumLines(20)
     editBox:DisableButton(true)
 
