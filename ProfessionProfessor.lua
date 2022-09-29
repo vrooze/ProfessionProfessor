@@ -1,4 +1,4 @@
-local version = "2.0.0";
+local version = "2.0.1";
 
 ProfessionProfessor = LibStub("AceAddon-3.0"):NewAddon("ProfessionProfessor", "AceEvent-3.0", "AceConsole-3.0", "AceSerializer-3.0")
 
@@ -29,9 +29,7 @@ function prof:OnInitialize()
     prof:RegisterChatCommand("pro", "consoleCommands");
 
     -- Event registration
-    -- Enchanting
-    prof:RegisterEvent("CRAFT_UPDATE", "craftUpdate")
-    -- Everything else
+    -- as or 3.0.3 Enchanting counts as a normal tradeskill
     prof:RegisterEvent("TRADE_SKILL_UPDATE", "tradeSkillUpdate")
 end
 
@@ -95,22 +93,15 @@ function updateProfessionDB(localisedName, numSkills)
 end
 
 function getSkillInfo(localisedName, i)
-    if localisedName == "Enchanting" then
-        return GetCraftInfo(i)
-    else
         return GetTradeSkillInfo(i)
-    end
 end    
 
 function getTradeSkillItemId(localisedName, i)
     local itemLink
     local returnid
 
-    if localisedName == "Enchanting" then
-        itemLink = GetCraftRecipeLink(i)
-    else
-        itemLink = GetTradeSkillRecipeLink(i)
-    end
+    itemLink = GetTradeSkillRecipeLink(i)
+
     returnid = itemLink:match("enchant:(%d+)")
     if returnid == nil then
         returnid = itemLink:match("item:(%d+)")
