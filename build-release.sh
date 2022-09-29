@@ -1,5 +1,5 @@
 #!/bin/bash
-RELEASE_NAME="ProfessionsProfessor"
+RELEASE_NAME="ProfessionProfessor"
 
 echo "Building Release zip..."
 rm -f ${RELEASE_NAME}.zip

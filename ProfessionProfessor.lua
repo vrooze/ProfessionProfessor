@@ -1,8 +1,9 @@
+local version = "2.0.0";
+
 ProfessionProfessor = LibStub("AceAddon-3.0"):NewAddon("ProfessionProfessor", "AceEvent-3.0", "AceConsole-3.0", "AceSerializer-3.0")
 
+-- Create shorthand reference for less typing
 prof = ProfessionProfessor
-
-local version = "2.0.0";
 
 local aceGUI = LibStub("AceGUI-3.0")
 
