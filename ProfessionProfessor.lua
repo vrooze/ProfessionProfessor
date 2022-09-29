@@ -2,6 +2,8 @@ ProfessionProfessor = LibStub("AceAddon-3.0"):NewAddon("ProfessionProfessor", "A
 
 prof = ProfessionProfessor
 
+local version = "2.0.0";
+
 local aceGUI = LibStub("AceGUI-3.0")
 
 local allowedTradeskills = {
@@ -18,6 +20,8 @@ local allowedTradeskills = {
 
 -- AceAddon :OnInitialize()
 function prof:OnInitialize()
+    self.version = version
+
     self.db = LibStub("AceDB-3.0"):New("ProfessionProfessorDB")
 
     -- Console commands
@@ -139,7 +143,7 @@ function showJson()
     -- Create a container frame
     local f = aceGUI:Create("Frame")
     f:SetCallback("OnClose",function(widget) aceGUI:Release(widget) end)
-    f:SetTitle("Profession Professor Skill Checker - Export")
+    f:SetTitle("Profession Professor Skill Checker - Export -- v" .. prof.version)
     f:SetLayout("Flow")
 
     local editBox = aceGUI:Create("MultiLineEditBox")
