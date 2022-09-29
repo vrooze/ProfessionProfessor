@@ -1,1 +1,3 @@
 .idea
+# Ignore release files
+*.zip
