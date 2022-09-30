@@ -1,4 +1,4 @@
-local version = "2.0.1";
+local version = "2.0.2";
 
 ProfessionProfessor = LibStub("AceAddon-3.0"):NewAddon("ProfessionProfessor", "AceEvent-3.0", "AceConsole-3.0", "AceSerializer-3.0")
 
@@ -24,6 +24,13 @@ function prof:OnInitialize()
     self.version = version
 
     self.db = LibStub("AceDB-3.0"):New("ProfessionProfessorDB")
+
+    -- Set up default options
+
+    if not self.db.char.options then
+        self.db.char.options = {}
+        self.db.char.options['verbose'] = false
+    end
 
     -- Console commands
     prof:RegisterChatCommand("pro", "consoleCommands");
@@ -78,7 +85,10 @@ function updateProfessionDB(localisedName, numSkills)
         -- Skip the headers, only check real skills
         if skillType ~= "header" then
             local itemLink, id = getTradeSkillItemId(localisedName, i)
-            prof:Print("Adding "  .. itemLink .. ' [' .. id .. ']')
+
+            if self.db.char.options and self.db.char.options['verbose'] == true then
+                prof:Print("Adding "  .. itemLink .. ' [' .. id .. ']')
+            end
             table.insert(learnedIds, id)
             amount = amount + 1
         end
@@ -128,7 +138,14 @@ function prof:consoleCommands(input)
             end
             self:Print(output)
         end
-    end    
+    elseif input == "verbose" then
+        if self.db.char.options and self.db.char.options['verbose'] then
+            local newstate = not self.db.char.options['verbose']
+            self.db.char.options['verbose'] = newstate
+            self.Print("Turned verbose mode " .. (newstate and 'On' or 'Off'))
+        end
+
+    end
 end
 
 function showJson()
