@@ -1,4 +1,4 @@
-local version = "2.0.4"
+local version = "v2.0.5"
 local isVerbose = false -- non-verbose  by default
 
 ProfessionProfessor = LibStub("AceAddon-3.0"):NewAddon("ProfessionProfessor", "AceEvent-3.0", "AceConsole-3.0", "AceSerializer-3.0")
@@ -170,7 +170,7 @@ function showJson()
     -- Create a container frame
     local f = aceGUI:Create("Frame")
     f:SetCallback("OnClose",function(widget) aceGUI:Release(widget) end)
-    f:SetTitle("Profession Professor Skill Checker - Export -- v" .. prof.version)
+    f:SetTitle("Profession Professor Skill Checker - Export -- " .. prof.version)
     f:SetLayout("Flow")
 
     local editBox = aceGUI:Create("MultiLineEditBox")
