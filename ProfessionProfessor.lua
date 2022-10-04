@@ -1,4 +1,5 @@
-local version = "2.0.3";
+local version = "2.0.4"
+local isVerbose = false -- non-verbose  by default
 
 ProfessionProfessor = LibStub("AceAddon-3.0"):NewAddon("ProfessionProfessor", "AceEvent-3.0", "AceConsole-3.0", "AceSerializer-3.0")
 
@@ -29,12 +30,11 @@ function prof:OnInitialize()
 
     if not self.db.char.options then
         self.db.char.options = {}
-        self.db.char.options['verbose'] = false
+        self.db.char.options['verbose'] = isVerbose
     end
 
     -- Console commands
-    prof:RegisterChatCommand("pro", "consoleCommands");
-
+    prof:RegisterChatCommand("pro", "consoleCommands")
     -- Event registration
     -- as or 3.0.3 Enchanting counts as a normal tradeskill
     prof:RegisterEvent("TRADE_SKILL_UPDATE", "tradeSkillUpdate")
@@ -49,7 +49,25 @@ local function hasValue(value)
     return false
 end
 
+function prof:toggleVerbose()
+    if self.db.char.options and self.db.char.options['verbose'] ~= nil then
+        isVerbose = not self.db.char.options['verbose']
+        self.db.char.options['verbose'] = isVerbose
+        self.Print("Turned verbose mode " .. (isVerbose and 'On' or 'Off'))
+    end
+end
+
 function prof:tradeSkillUpdate()
+    -- Add in a check if the tradeskill has been linked (we don't want to index someone elses recipes!)
+    local isLink, linkedPlayer = IsTradeSkillLinked()
+    if isLink ~= nil then
+        if isVerbose then
+            self:Print("Recipe is a linked skill from player " .. linkedPlayer)
+        end
+        -- break out early
+        return
+    end
+
     local localisedName = GetTradeSkillLine()
     local numSkills = GetNumTradeSkills()
     updateProfessionDB(localisedName, numSkills)
@@ -139,11 +157,7 @@ function prof:consoleCommands(input)
             self:Print(output)
         end
     elseif input == "verbose" then
-        if self.db.char.options and self.db.char.options['verbose'] ~= nil then
-            local newstate = not self.db.char.options['verbose']
-            self.db.char.options['verbose'] = newstate
-            self.Print("Turned verbose mode " .. (newstate and 'On' or 'Off'))
-        end
+        self:toggleVerbose()
     end
 end
 
