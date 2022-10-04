@@ -31,13 +31,15 @@ function prof:OnInitialize()
     if not self.db.char.options then
         self.db.char.options = {}
         self.db.char.options['verbose'] = isVerbose
+	else
+		isVerbose = self.db.char.options['verbose']
     end
 
     -- Console commands
     prof:RegisterChatCommand("pro", "consoleCommands")
     -- Event registration
     -- as or 3.0.3 Enchanting counts as a normal tradeskill
-    prof:RegisterEvent("TRADE_SKILL_UPDATE", "tradeSkillUpdate")
+    prof:RegisterEvent("TRADE_SKILL_SHOW", "tradeSkillUpdate")
 end
 
 local function hasValue(value)
@@ -53,16 +55,16 @@ function prof:toggleVerbose()
     if self.db.char.options and self.db.char.options['verbose'] ~= nil then
         isVerbose = not self.db.char.options['verbose']
         self.db.char.options['verbose'] = isVerbose
-        self.Print("Turned verbose mode " .. (isVerbose and 'On' or 'Off'))
+        prof:Print("Turned verbose mode " .. (isVerbose and 'On' or 'Off'))
     end
 end
 
 function prof:tradeSkillUpdate()
     -- Add in a check if the tradeskill has been linked (we don't want to index someone elses recipes!)
     local isLink, linkedPlayer = IsTradeSkillLinked()
-    if isLink ~= nil then
+    if isLink then
         if isVerbose then
-            self:Print("Recipe is a linked skill from player " .. linkedPlayer)
+            prof:Print("Recipe is a linked skill from player " .. linkedPlayer)
         end
         -- break out early
         return
@@ -111,12 +113,15 @@ function updateProfessionDB(localisedName, numSkills)
             amount = amount + 1
         end
     end
+	
     if #learnedIds > 0 then
         prof.db.char.professions[localisedName] = {
             ["numSkills"] =  numSkills,
             ["realNumSkills"] = amount,
             ["learnedIds"] = learnedIds
         }
+		
+		prof:Print(#learnedIds .. " new " .. (#learnedIds > 1 and "recipes" or "recipe") .. " found for " .. localisedName)
     end
 end
 

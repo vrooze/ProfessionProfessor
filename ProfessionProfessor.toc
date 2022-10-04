@@ -2,7 +2,7 @@
 ## Title: Profession Professor
 ## Author: Gyldendahl-MirageRaceway-EU Maintained by Xiri-MirageRaceway-EU
 ## Notes: Exports profession skills to be used with discord
-## Version: 2.0.4
+## Version: 2.0.5
 ## SavedVariables: ProfessionProfessorDB
 
 Libs\LibStub\LibStub.lua
