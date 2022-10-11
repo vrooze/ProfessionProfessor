@@ -1,7 +1,7 @@
-local version = "v2.0.5"
 local isVerbose = false -- non-verbose  by default
+local userNotifiedOfNewVersion = false
 
-ProfessionProfessor = LibStub("AceAddon-3.0"):NewAddon("ProfessionProfessor", "AceEvent-3.0", "AceConsole-3.0", "AceSerializer-3.0")
+ProfessionProfessor = LibStub("AceAddon-3.0"):NewAddon("ProfessionProfessor", "AceEvent-3.0", "AceComm-3.0", "AceConsole-3.0", "AceSerializer-3.0")
 
 -- Create shorthand reference for less typing
 prof = ProfessionProfessor
@@ -22,7 +22,7 @@ local allowedTradeskills = {
 
 -- AceAddon :OnInitialize()
 function prof:OnInitialize()
-    self.version = version
+    self.version = GetAddOnMetadata("ProfessionProfessor", "Version")
 
     self.db = LibStub("AceDB-3.0"):New("ProfessionProfessorDB")
 
@@ -31,18 +31,28 @@ function prof:OnInitialize()
     if not self.db.char.options then
         self.db.char.options = {}
         self.db.char.options['verbose'] = isVerbose
-	else
-		isVerbose = self.db.char.options['verbose']
+    else
+        isVerbose = self.db.char.options['verbose']
     end
 
     -- Console commands
     prof:RegisterChatCommand("pro", "consoleCommands")
     -- Event registration
     -- as or 3.0.3 Enchanting counts as a normal tradeskill
-    prof:RegisterEvent("TRADE_SKILL_SHOW", "tradeSkillUpdate")
+    prof:RegisterEvent("TRADE_SKILL_UPDATE", "tradeSkillUpdate")
+    
+    -- Version checking
+    prof:RegisterComm("PROFPRO_VERSION", "onCommReceived")
+    prof:SendCommMessage("PROFPRO_VERSION", prof.version, "GUILD")
 end
 
-local function hasValue(value)
+local function verbosePrint(message)
+    if isVerbose then
+        prof:Print(message)
+    end
+end
+
+local function isTradeskillSupported(value)
     for i,v in ipairs(allowedTradeskills) do
         if v == value then
             return true
@@ -63,73 +73,79 @@ function prof:tradeSkillUpdate()
     -- Add in a check if the tradeskill has been linked (we don't want to index someone elses recipes!)
     local isLink, linkedPlayer = IsTradeSkillLinked()
     if isLink then
-        if isVerbose then
-            prof:Print("Recipe is a linked skill from player " .. linkedPlayer)
-        end
+        verbosePrint("Recipe is a linked skill from player " .. linkedPlayer)
         -- break out early
         return
     end
 
+    updateProfessionDB()
+end
+
+function prof:onCommReceived(prefix, payload, distribution, sender)    
+    if prefix == "PROFPRO_VERSION" then
+        -- Only notify the user once of a newer version
+        if userNotifiedOfNewVersion then
+            return
+        end
+    
+        local rMajor, rMinor, rPatch = string.match(payload, "(%d+)%.(%d+)%.(%d+)")
+        local cMajor, cMinor, cPatch = string.match(prof.version, "(%d+)%.(%d+)%.(%d+)")
+        
+        if rMajor > cMajor or (rMinor > cMinor and rMajor == cMajor) or (rPatch > cPatch and rMinor == cMinor and rMajor == cMajor) then
+            prof:Print("A newer version (".. payload ..") is available, please update!")
+            userNotifiedOfNewVersion = true
+        end
+    end
+end
+
+function updateProfessionDB()
     local localisedName = GetTradeSkillLine()
     local numSkills = GetNumTradeSkills()
-    updateProfessionDB(localisedName, numSkills)
-end
-
-function prof:craftUpdate()
-    local localisedName = GetCraftDisplaySkillLine()
-    local numSkills = GetNumCrafts()
-    updateProfessionDB(localisedName, numSkills)
-end
-
-function updateProfessionDB(localisedName, numSkills)
-
-    if localisedName == nil or localisedName == "UNKNOWN" then return end
-    if hasValue(localisedName) == false then return end
+    
+    if not isTradeskillSupported(localisedName) then 
+        return 
+    end
 
     if type(prof.db.char.professions) == "table" then
         if prof.db.char.professions[localisedName] and prof.db.char.professions[localisedName]["numSkills"] >= numSkills then
+            verbosePrint("No new recipes found for " .. localisedName)
             return
         end
     else
         prof.db.char.professions = {}
     end
 
-    prof:Print("Updating database for " .. localisedName)
+    verbosePrint("Updating database for " .. localisedName)
 
     local learnedIds = {}
     local amount = 0
 
-
     for i=1,numSkills do
-        local _,skillType = getSkillInfo(localisedName, i) -- Need localization
+        local _,skillType = GetTradeSkillInfo(i)
         -- Skip the headers, only check real skills
         if skillType ~= "header" then
-            local itemLink, id = getTradeSkillItemId(localisedName, i)
+            local itemLink, id = getTradeSkillItemId(i)
 
-            if prof.db.char.options and prof.db.char.options['verbose'] == true then
-                prof:Print("Adding "  .. itemLink .. ' [' .. id .. ']')
-            end
+            verbosePrint("Adding "  .. itemLink .. ' [' .. id .. ']')
             table.insert(learnedIds, id)
             amount = amount + 1
         end
     end
-	
-    if #learnedIds > 0 then
+    
+    if amount > 0 then
+        previousAmount = prof.db.char.professions[localisedName] and prof.db.char.professions[localisedName]["realNumSkills"] or 0
         prof.db.char.professions[localisedName] = {
             ["numSkills"] =  numSkills,
             ["realNumSkills"] = amount,
             ["learnedIds"] = learnedIds
         }
-		
-		prof:Print(#learnedIds .. " new " .. (#learnedIds > 1 and "recipes" or "recipe") .. " found for " .. localisedName)
+        
+        newlyLearnedAmount = amount - previousAmount        
+        prof:Print(newlyLearnedAmount .. " new " .. (newlyLearnedAmount > 1 and "recipes" or "recipe") .. " found for " .. localisedName)
     end
 end
 
-function getSkillInfo(localisedName, i)
-        return GetTradeSkillInfo(i)
-end    
-
-function getTradeSkillItemId(localisedName, i)
+function getTradeSkillItemId(i)
     local itemLink
     local returnid
 
@@ -174,7 +190,7 @@ function showJson()
     f:SetLayout("Flow")
 
     local editBox = aceGUI:Create("MultiLineEditBox")
-	editBox:SetWidth(800)
+    editBox:SetWidth(800)
     editBox:SetHeight(500)
     editBox:SetText(convertTableToString())
     editBox:SetLabel("Copy text and paste into your discord channel with the Profession Professor bot and using the /upload slash command")
