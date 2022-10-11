@@ -61,14 +61,6 @@ local function isTradeskillSupported(value)
     return false
 end
 
-local function splitString(s, delimiter)
-    result = {};
-    for match in (s..delimiter):gmatch("(.-)%"..delimiter) do
-        table.insert(result, match);
-    end
-    return result;
-end
-
 function prof:toggleVerbose()
     if self.db.char.options and self.db.char.options['verbose'] ~= nil then
         isVerbose = not self.db.char.options['verbose']
@@ -96,21 +88,12 @@ function prof:onCommReceived(prefix, payload, distribution, sender)
             return
         end
     
-        receivedVersion = splitString(payload, ".")
-        currentVersion = splitString(prof.version, ".")
+        local rMajor, rMinor, rPatch = string.match(payload, "(%d+)%.(%d+)%.(%d+)")
+        local cMajor, cMinor, cPatch = string.match(prof.version, "(%d+)%.(%d+)%.(%d+)")
         
-        for i=1, #receivedVersion do
-            if tonumber(currentVersion[i]) < tonumber(receivedVersion[i]) then
-                prof:Print("A newer version (".. payload ..") is available, please update!")
-                userNotifiedOfNewVersion = true
-                return
-            end
-            
-            -- Check if our version is newer and early out, if we don't do this there might be issues
-            -- with checking versions 2.1.1 vs 2.0.9
-            if tonumber(currentVersion[i]) > tonumber(receivedVersion[i]) then
-                return
-            end
+        if rMajor > cMajor or (rMinor > cMinor and rMajor == cMajor) or (rPatch > cPatch and rMinor == cMinor and rMajor == cMajor) then
+            prof:Print("A newer version (".. payload ..") is available, please update!")
+            userNotifiedOfNewVersion = true
         end
     end
 end
