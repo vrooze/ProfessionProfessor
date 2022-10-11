@@ -90,29 +90,29 @@ function prof:tradeSkillUpdate()
 end
 
 function prof:onCommReceived(prefix, payload, distribution, sender)    
-	if prefix == "PROFPRO_VERSION" then
-		-- Only notify the user once of a newer version
-		if userNotifiedOfNewVersion then
-			return
-		end
-	
-		receivedVersion = splitString(payload, ".")
-		currentVersion = splitString(prof.version, ".")
-		
-		for i=1, #receivedVersion do
-			if tonumber(currentVersion[i]) < tonumber(receivedVersion[i]) then
-				prof:Print("A newer version (".. payload ..") is available, please update!")
-				userNotifiedOfNewVersion = true
-				return
-			end
-			
-			-- Check if our version is newer and early out, if we don't do this there might be issues
-			-- with checking versions 2.1.1 vs 2.0.9
-			if tonumber(currentVersion[i]) > tonumber(receivedVersion[i]) then
-				return
-			end
-		end
-	end
+    if prefix == "PROFPRO_VERSION" then
+        -- Only notify the user once of a newer version
+        if userNotifiedOfNewVersion then
+            return
+        end
+    
+        receivedVersion = splitString(payload, ".")
+        currentVersion = splitString(prof.version, ".")
+        
+        for i=1, #receivedVersion do
+            if tonumber(currentVersion[i]) < tonumber(receivedVersion[i]) then
+                prof:Print("A newer version (".. payload ..") is available, please update!")
+                userNotifiedOfNewVersion = true
+                return
+            end
+            
+            -- Check if our version is newer and early out, if we don't do this there might be issues
+            -- with checking versions 2.1.1 vs 2.0.9
+            if tonumber(currentVersion[i]) > tonumber(receivedVersion[i]) then
+                return
+            end
+        end
+    end
 end
 
 function updateProfessionDB()
